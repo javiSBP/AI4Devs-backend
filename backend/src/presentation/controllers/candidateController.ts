@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { addCandidate, findCandidateById } from '../../application/services/candidateService';
+import { addCandidate, findCandidateById, updateCandidateStage as updateCandidateStageService } from '../../application/services/candidateService';
 
 export const addCandidateController = async (req: Request, res: Response) => {
     try {
@@ -28,6 +28,39 @@ export const getCandidateById = async (req: Request, res: Response) => {
         res.json(candidate);
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+export const updateCandidateStage = async (req: Request, res: Response) => {
+    try {
+        const candidateId = parseInt(req.params.id);
+        const { interviewStepId } = req.body;
+        
+        // Validate input
+        if (isNaN(candidateId)) {
+            return res.status(400).json({ error: 'Invalid candidate ID format' });
+        }
+        
+        if (!interviewStepId || typeof interviewStepId !== 'number') {
+            return res.status(400).json({ error: 'Invalid or missing interviewStepId in request body' });
+        }
+        
+        // Update the candidate's stage
+        const updatedApplication = await updateCandidateStageService(candidateId, interviewStepId);
+        
+        res.json({
+            message: 'Candidate stage updated successfully',
+            data: updatedApplication
+        });
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            if (error.message.includes('not found')) {
+                return res.status(404).json({ error: error.message });
+            }
+            res.status(400).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: 'An unexpected error occurred' });
+        }
     }
 };
 

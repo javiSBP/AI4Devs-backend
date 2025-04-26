@@ -21,4 +21,15 @@ Este endpoint recogerá todos los candidatos en proceso para una determinada pos
 - La puntuación media del candidato de todas las entrevistas que ha realizado para esa posición.
 
 Crea todas las capas necesarias, validaciones, consultas de prisma, etc. que consideres siguiendo la arquitectura, buenas práctivas y convenciones del @backend analizadas anteriormente.
+```
+
+---
+## Implementar endpoint para actualizar etapa de candidato
+
+```
+Por último, en la misma linea del anterior endpoint, implementa el siguiente:
+
+PUT /candidates/:id/stage
+
+Este endpoint actualizará la etapa del candidato movido. Permite modificar la fase actual del proceso de entrevista en la que se encuentra un candidato específico.
 ``` 
