@@ -83,5 +83,67 @@ export class Position {
         if (!data) return null;
         return new Position(data);
     }
+    
+    /**
+     * Finds a position by its ID
+     * @param id The ID of the position to find
+     * @returns The position or null if not found
+     */
+    static async findById(id: number): Promise<Position | null> {
+        return this.findOne(id);
+    }
+    
+    /**
+     * Gets all candidates for a specific position with their interview step info and average scores
+     * @param positionId The ID of the position
+     * @returns Array of candidate data with interview information
+     */
+    static async getCandidatesForPosition(positionId: number): Promise<any[]> {
+        // Get all applications for this position with their candidate and interview data
+        const applications = await prisma.application.findMany({
+            where: {
+                positionId: positionId
+            },
+            include: {
+                candidate: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true
+                    }
+                },
+                interviewStep: {
+                    select: {
+                        name: true
+                    }
+                },
+                interviews: {
+                    select: {
+                        score: true
+                    }
+                }
+            }
+        });
+        
+        // Process the data to calculate average scores and format the output
+        return applications.map(application => {
+            // Calculate average score from all interviews
+            const scores = application.interviews
+                .filter(interview => interview.score !== null && interview.score !== undefined)
+                .map(interview => interview.score as number);
+                
+            const averageScore = scores.length > 0
+                ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+                : null;
+                
+            return {
+                id: application.candidate.id,
+                firstName: application.candidate.firstName,
+                lastName: application.candidate.lastName,
+                currentInterviewStep: application.interviewStep.name,
+                averageScore: averageScore
+            };
+        });
+    }
 }
 
